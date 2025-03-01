@@ -9,12 +9,13 @@ const addPresentationCore = `Add-Type -AssemblyName presentationCore;`
 const createMediaPlayer = `$player = New-Object system.windows.media.mediaplayer;`
 const loadAudioFile = path => `$player.open('${path}');`
 const playAudio = `$player.Play();`
-const stopAudio = `Start-Sleep 1; Start-Sleep -s $player.NaturalDuration.TimeSpan.TotalSeconds;Exit;`
+const bufferWait = `while ($player.BufferingProgress -eq 0) { $player.BufferingProgress };`
+const stopAudio = `Start-Sleep -s $player.NaturalDuration.TimeSpan.TotalSeconds;Exit;`
 
 const windowPlayCommand = (path, volume) =>
   `powershell -c ${addPresentationCore} ${createMediaPlayer} ${loadAudioFile(
     path,
-  )} $player.Volume = ${volume}; ${playAudio} ${stopAudio}`
+  )} $player.Volume = ${volume}; ${playAudio} ${bufferWait} ${stopAudio}`
 
 module.exports = {
   play: async (path, volume=0.5) => {

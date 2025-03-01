@@ -1,3 +1,7 @@
+> This fork simply updates the Windows audio player to wait for the player to
+finish buffering instead of just sleeping for one second as sometimes buffering
+takes more than one second which results in the audio clip getting cut short.
+
 # sound-play
 
 _Dead simple sound player for Node -- because it should be simple._
