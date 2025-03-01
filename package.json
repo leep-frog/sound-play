@@ -6,6 +6,9 @@
   "scripts": {
     "build": "webpack --config webpack.config.js"
   },
+  "publishConfig": {
+    "access": "public"
+  },
   "author": "nomadhoc",
   "repository": "nomadhoc/sound-play",
   "bugs": {
