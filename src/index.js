@@ -8,14 +8,14 @@ const macPlayCommand = (path, volume) => `afplay \"${path}\" -v ${volume}`
 const addPresentationCore = `Add-Type -AssemblyName presentationCore;`
 const createMediaPlayer = `$player = New-Object system.windows.media.mediaplayer;`
 const loadAudioFile = path => `$player.open('${path}');`
+const createIsPlayingHook = `$isPlaying = $true; $player.add_MediaEnded({ $global:isPlaying = $false });`
 const playAudio = `$player.Play();`
-const bufferWait = `while ($player.BufferingProgress -eq 0) { $player.BufferingProgress };`
-const stopAudio = `Start-Sleep -s $player.NaturalDuration.TimeSpan.TotalSeconds;Exit;`
+const stopAudio = `while ($isPlaying) { Start-Sleep -Milliseconds 500; }; Exit;`
 
 const windowPlayCommand = (path, volume) =>
   `powershell -c ${addPresentationCore} ${createMediaPlayer} ${loadAudioFile(
     path,
-  )} $player.Volume = ${volume}; ${playAudio} ${bufferWait} ${stopAudio}`
+  )} $player.Volume = ${volume}; ${createIsPlayingHook} ${playAudio} ${stopAudio}`
 
 module.exports = {
   play: async (path, volume=0.5) => {
@@ -29,7 +29,10 @@ module.exports = {
     const playCommand =
       process.platform === 'darwin' ? macPlayCommand(path, volumeAdjustedByOS) : windowPlayCommand(path, volumeAdjustedByOS)
     try {
-      await execPromise(playCommand, {windowsHide: true})
+      await execPromise(playCommand, {windowsHide: true}).then(undefined, (err) => {
+        console.log("Playing error");
+        console.error(err);
+      });
     } catch (err) {
       throw err
     }
