@@ -7,15 +7,17 @@ const macPlayCommand = (path, volume) => `afplay \"${path}\" -v ${volume}`
 /* WINDOW PLAY COMMANDS */
 const addPresentationCore = `Add-Type -AssemblyName presentationCore;`
 const createMediaPlayer = `$player = New-Object system.windows.media.mediaplayer;`
+const createDispather = `$dispatchFrame = New-Object System.Windows.Threading.DispatcherFrame;`
+const addMediaEndedHook = `$player.add_MediaEnded({ $dispatchFrame.Continue = $false });`
 const loadAudioFile = path => `$player.open('${path}');`
-const createIsPlayingHook = `$isPlaying = $true; $player.add_MediaEnded({ $global:isPlaying = $false });`
 const playAudio = `$player.Play();`
+const runDispatcher = `[System.Windows.Threading.Dispatcher]::PushFrame($dispatchFrame);`
 const stopAudio = `while ($isPlaying) { Start-Sleep -Milliseconds 500; }; Exit;`
 
 const windowPlayCommand = (path, volume) =>
-  `powershell -c ${addPresentationCore} ${createMediaPlayer} ${loadAudioFile(
+  `powershell -c ${addPresentationCore} ${createMediaPlayer} ${createDispather} ${addMediaEndedHook} ${loadAudioFile(
     path,
-  )} $player.Volume = ${volume}; ${createIsPlayingHook} ${playAudio} ${stopAudio}`
+  )} $player.Volume = ${volume}; ${playAudio} ${runDispatcher} ${stopAudio}`
 
 module.exports = {
   play: async (path, volume=0.5) => {
