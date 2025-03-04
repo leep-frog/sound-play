@@ -30,8 +30,6 @@ module.exports = {
 
     const playCommand =
       process.platform === 'darwin' ? macPlayCommand(path, volumeAdjustedByOS) : windowPlayCommand(path, volumeAdjustedByOS)
-    console.log("playing");
-    console.log(playCommand);
     try {
       await execPromise(playCommand, {windowsHide: true});
     } catch (err) {
